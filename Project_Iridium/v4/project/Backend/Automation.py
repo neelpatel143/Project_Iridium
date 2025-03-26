@@ -8,8 +8,6 @@ from pywhatkit import search
 import requests
 from AppOpener import open as appopen
 from pywhatkit.core.exceptions import InternetException
-import psutil
-import pygetwindow as gw
 
 # --- Functions to Open/Close Apps/Websites ---
 
@@ -80,70 +78,26 @@ def google_search(query: str) -> bool:
         print(f"⚠️ Error performing Google search: {e}")
         return False
 
-def is_spotify_running():
-    """Check if Spotify is already running in the background."""
-    for process in psutil.process_iter(["name"]):
-        if "spotify" in process.info["name"].lower():
-            return True
-    return False
-
-def bring_spotify_to_front():
-    """Bring Spotify to the front if it's running."""
-    try:
-        for window in gw.getWindowsWithTitle("Spotify"):
-            window.activate()  # ✅ Bring Spotify to the front
-            print("🎵 Bringing Spotify to the front...")
-            time.sleep(1)  # Small delay to ensure it's focused
-            return True
-    except Exception as e:
-        print(f"⚠️ Could not bring Spotify to the front: {e}")
-    return False
-
 def play_spotify(song: str) -> bool:
     """
-    Open Spotify and play a song automatically.
-    If Spotify is running → Bring it to the front and play.
-    If Spotify is NOT running → Open it, then play.
+    Open Spotify and simulate a search for a song.
+    First, try opening the Spotify desktop app. If that fails, fallback to the Spotify website.
     """
     try:
-        if is_spotify_running():
-            print("✅ Spotify is already running, bringing it to focus...")
-            if not bring_spotify_to_front():
-                print("⚠️ Couldn't focus Spotify, trying anyway...")
-        else:
-            try:
-                subprocess.run(["spotify"], check=True)  # Open Spotify app
-                time.sleep(5)  # Wait for Spotify to open
-            except Exception:
-                print("Spotify app not found, opening web player...")
-                webbrowser.open("https://open.spotify.com/")
-                time.sleep(6)  # Wait for Web Spotify to load
-                print("Please make sure you're logged into Spotify Web.")
-                return False  
-
-        # ✅ Ensure Spotify is in focus before sending commands
-        time.sleep(2)
-
-        # ✅ Search for the song
-        pyautogui.hotkey("ctrl", "l")  # Focus on search bar
+        # Attempt to open the Spotify application.
+        if not open_application("spotify"):
+            # If not available, open Spotify in a browser.
+            webbrowser.open("https://open.spotify.com/")
+        time.sleep(5)  # Allow time for Spotify to load.
+        pyautogui.hotkey('ctrl', 'l')  # Focus on the search bar.
         time.sleep(1)
         pyautogui.write(song, interval=0.1)
         time.sleep(1)
-        pyautogui.press("enter")  # Search for the song
-
-        # ✅ Play the first song in the search results
-        time.sleep(2)  # Wait for search results
-        pyautogui.press("tab", presses=3)  # Navigate to the first song
-        pyautogui.press("enter")  # Play the song
-        
-        print(f"🎵 Now playing: {song}")
-
-        return True  # Successfully played the song
-
+        pyautogui.press('enter')
+        return True
     except Exception as e:
-        print(f"❌ Error playing Spotify: {e}")
+        print(f"Error playing Spotify: {e}")
         return False
-    
 
 # --- Windows Volume Control Helpers ---
 

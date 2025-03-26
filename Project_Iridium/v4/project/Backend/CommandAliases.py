@@ -16,7 +16,6 @@ COMMAND_PREFIXES = {
         "visit webpage", "Visit Webpage", "VISIT WEBPAGE",
         "website open", "Website Open", "WEBSITE OPEN"
     ],
-    
 
     "open_app": [
         "open", "Open", "OPEN",
